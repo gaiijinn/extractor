@@ -46,29 +46,28 @@ def process_websites_in_process(websites, browser):
 
 def remove_duplicates_and_empty_emails(input_path, output_path):
     seen = set()
-    filtered_data = []
 
     with open(input_path, mode="r", encoding="utf-8", newline="") as infile:
         reader = csv.DictReader(infile)
         for row in reader:
             email = row["email"]
-            if email and email not in seen:
-                seen.add(email)
-                filtered_data.append({"website": row["website"], "email": email})
+            if email:
+                seen.add((row["website"], email))
 
     with open(output_path, mode="w", encoding="utf-8", newline="") as outfile:
         writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
         writer.writeheader()
-        writer.writerows(filtered_data)
+        writer.writerows({"website": website, "email": email} for website, email in seen)
+
 
 def main():
     time_start = time.time()
     browser = Browser()
     output_path = Path("thread_result/just_all_data_3procc_70thread_5depth2.csv")
-    final_output_path = Path("thread_result/just_all_data_filtered1.csv")
+    final_output_path = Path("thread_result/just_all_data_filtered2.csv")
 
-    # websites = read_websites('crunchbase_data/organizations.csv')
-    websites = read_websites('crunchbase_data/test.csv')
+    websites = read_websites('crunchbase_data/organizations1.csv')
+    # websites = read_websites('crunchbase_data/test.csv')
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=3) as process_executor:
         chunk_size = len(websites) // 3
