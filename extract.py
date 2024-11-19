@@ -6,6 +6,7 @@ from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser as Browser
 
+
 def read_websites(file_path):
     with open(file_path, "r", encoding="utf-8") as infile:
         reader = csv.DictReader(infile)
@@ -20,6 +21,7 @@ def save_to_custom_csv(data, output_path):
             writer.writerow(["website", "page", "email"])
 
         for row in data:
+            print(row)
             website = getattr(row, 'website', '')
             page = getattr(row, 'page', '')
             email = ''
@@ -47,10 +49,10 @@ def process_websites_in_process(websites, browser):
 def main():
     time_start = time.time()
     browser = Browser()
-    output_path = Path("thread_result/just_all_data_3procc_70thread_5depth.csv")
+    output_path = Path("thread_result/test.csv")
 
     websites = read_websites('crunchbase_data/organizations.csv')
-    #websites = read_websites('crunchbase_data/test.csv')
+    #websites = read_websites('crunchbase_data/small_data.csv')
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=3) as process_executor:
         chunk_size = len(websites) // 3
