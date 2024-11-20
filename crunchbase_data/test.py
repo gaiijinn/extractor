@@ -1,6 +1,6 @@
 import csv
 import subprocess
-from parser.csv_reader import CSVParser
+from parser.csv_reader import CSVReader
 
 
 def install_extractor():
@@ -35,8 +35,8 @@ def extract_emails_from_url(domain, output_file):
 def process_csv(input_file, output_file):
     summary_data = []
 
-    parser = CSVParser(input_file, 'homepage_url')
-    homepage_urls = parser.get_data()
+    parser = CSVReader('homepage_url', input_file)
+    homepage_urls = parser.read_file()
 
     for homepage_url in homepage_urls:
         homepage_url = homepage_url.strip()
@@ -58,6 +58,6 @@ def process_csv(input_file, output_file):
 if __name__ == '__main__':
     install_extractor()
     input_file = 'small_data.csv'
-    output_file = 'result.csv'
+    output_file = 'result_small_data.csv'
     process_csv(input_file, output_file)
     print('Done!')
