@@ -1,5 +1,4 @@
 import csv
-import re
 import time
 import concurrent.futures
 from pathlib import Path
@@ -7,13 +6,11 @@ from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser as Browser
 
-
 def read_websites(file_path):
     with open(file_path, "r", encoding="utf-8") as infile:
         reader = csv.DictReader(infile)
         result = list(row["homepage_url"] for row in reader if row.get("homepage_url"))
         return result
-
 
 def save_to_custom_csv(data, output_path):
     with open(output_path, mode="a", encoding="utf-8", newline="") as file:
@@ -33,7 +30,6 @@ def save_to_custom_csv(data, output_path):
 
             writer.writerow([website, page, email])
 
-
 def process_website(website, browser):
     factory = Factory(
         website_url=website, browser=browser, depth=5, max_links_from_page=1
@@ -42,54 +38,19 @@ def process_website(website, browser):
     data = worker.get_data()
     return data
 
-
 def process_websites_in_process(websites, browser):
     with concurrent.futures.ThreadPoolExecutor(max_workers=70) as thread_executor:
         futures = [thread_executor.submit(process_website, website, browser) for website in websites]
         all_data = [future.result() for future in concurrent.futures.as_completed(futures)]
     return all_data
 
-
-def extract_email(raw_email):
-    email_regex = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-    match = re.search(email_regex, raw_email)
-    return match.group(0) if match else ""
-
-
-def is_valid_email(email):
-    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(email_regex, email) is not None
-
-
-def filter_and_save_unique_emails(input_path, output_path):
-
-    with open(input_path, "r", newline='', encoding="utf-8") as i_csv, \
-            open(output_path, "w", newline='', encoding="utf-8") as o_csv:
-
-        csv_reader = csv.DictReader(i_csv)
-        csv_writer = csv.DictWriter(o_csv, fieldnames=["website", "email"])
-        csv_writer.writeheader()
-
-        unique_emails = set()
-
-        for row in csv_reader:
-            raw_email = row.get('email', '').strip()
-            email = extract_email(raw_email)
-            if email and email not in unique_emails:
-                unique_emails.add(email)
-                csv_writer.writerow({'website': row.get('website', ''), 'email': email})
-
-
 def main():
     time_start = time.time()
     browser = Browser()
-    output_path = Path("thread_result/just_all_data_4procc_70thread_5depth2.csv")
-    second_output_path = Path('finals/finalemails1.csv')
-    # all have 70 threads. 3procc - 197.09 sec, 4procc - 195.47
+    output_path = Path("thread_result/just_all_data_3procc_70thread_5depth.csv")
 
     websites = read_websites('crunchbase_data/organizations.csv')
-
-    #   websites = read_websites('crunchbase_data/test.csv')
+    #websites = read_websites('crunchbase_data/test.csv')
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=3) as process_executor:
         chunk_size = len(websites) // 3
@@ -105,11 +66,8 @@ def main():
         for data in all_data:
             save_to_custom_csv(data, output_path)
 
-    filter_and_save_unique_emails(output_path, second_output_path)
-
     time_end = time.time()
     print(f"Processing time: {time_end - time_start:.2f} seconds")
-
 
 if __name__ == "__main__":
     main()
