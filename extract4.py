@@ -71,6 +71,37 @@ def remove_duplicates_and_empty_emails(input_path, output_path):
             for email in emails:
                 writer.writerow({"website": website, "email": email})
 
+# def remove_duplicates_and_empty_emails(input_path, output_path):
+#     seen = set()
+#
+#     with open(input_path, mode="r", encoding="utf-8", newline="") as infile:
+#         reader = csv.DictReader(infile)
+#         for row in reader:
+#             email = row["email"]
+#             if email:
+#                 seen.add((row["website"], email))
+#
+#     with open(output_path, mode="w", encoding="utf-8", newline="") as outfile:
+#         writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
+#         writer.writeheader()
+#         writer.writerows({"website": website, "email": email} for website, email in seen)
+
+# def remove_duplicates_and_empty_emails(input_path, output_path):
+#     seen = set()
+#     filtered_data = []
+#
+#     with open(input_path, mode="r", encoding="utf-8", newline="") as infile:
+#         reader = csv.DictReader(infile)
+#         for row in reader:
+#             email = row["email"]
+#             if email and email not in seen:
+#                 seen.add(email)
+#                 filtered_data.append({"website": row["website"], "email": email})
+#
+#     with open(output_path, mode="w", encoding="utf-8", newline="") as outfile:
+#         writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
+#         writer.writeheader()
+#         writer.writerows(filtered_data)
 
 def main():
     time_start = time.time()
