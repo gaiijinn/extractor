@@ -1,79 +1,72 @@
-from csv_reader import CSVParser
-
+from parser.csv_reader import CSVParser
 from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
-from extract_emails.browsers.requests_browser import RequestsBrowser as Browser
+from extract_emails.browsers.requests_browser import RequestsBrowser
 import concurrent.futures
 import time
-from abc import abstractmethod, ABC
+from extract_emails.browsers.page_source_getter import PageSourceGetter
+from typing import Type
+from parser import chunkers, mixins
+import abc
 
 
+class BaseFastProcessor(abc.ABC, mixins.ThreadMixin, mixins.ProcessMixin):
+    def __init__(self, threads: int = 1, processes: int = 1,
+                 chunker_class: Type[chunkers.BaseChunker] = chunkers.SimpleChunker):
+        self.threads = threads
+        self.processes = processes
+        self.chunker = chunker_class(self.processes)
 
-class BaseChunker(ABC):
-    @abstractmethod
-    def chunk_data(self, data):
+    @abc.abstractmethod
+    def worker_function(self, item):
         pass
 
-class SimpleChunker(BaseChunker):
-    def __init__(self, num_processes):
-        self.num_processes = num_processes
+    def process_data(self, data):
+        chunks = self.chunker.chunk_data(data)
+        results = self.process_in_processes(
+            chunks, self._process_chunk, max_processes=self.processes
+        )
+        return [item for sublist in results for item in sublist]
 
-    def chunk_data(self, data):
-        chunk_size = len(data) // self.num_processes
-        return [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+    def process_in_threads(self, items, worker_func, max_threads):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+            futures = [executor.submit(worker_func, item) for item in items]
+            return [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    def process_in_processes(self, items, worker_func, max_processes):
+        with concurrent.futures.ProcessPoolExecutor(max_workers=max_processes) as executor:
+            futures = [executor.submit(worker_func, item) for item in items]
+            return [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    def _process_chunk(self, chunk):
+        return self.process_in_threads(chunk, self.worker_function, max_threads=self.threads)
 
 
-class PercentageChunker(BaseChunker):
-    def __init__(self, percentage):
-        if not (0 < percentage <= 100):
-            raise ValueError("Percentage must be between 0 and 100.")
-        self.percentage = percentage
-
-    def chunk_data(self, data):
-        chunk_size = max(1, int(len(data) * (self.percentage / 100)))
-        return [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
-
-
-class FastParsing:
-    def __init__(self, websites, threads=1, process=1):
-        self.threads = threads
-        self.processes = process
+class WebsiteProcessor(BaseFastProcessor):
+    def __init__(self, websites, threads: int = 1, processes: int = 1,
+                 chunker_class: Type[chunkers.BaseChunker] = chunkers.SimpleChunker,
+                 browser: Type[PageSourceGetter] = RequestsBrowser):
+        super().__init__(threads, processes, chunker_class)
         self.websites = websites
-        self.browser = Browser()
+        self.browser = browser()
 
-    def process_website(self, website):
+    def worker_function(self, website):
         factory = Factory(website_url=website, browser=self.browser, depth=5, max_links_from_page=1)
         worker = DefaultWorker(factory)
         return worker.get_data()
 
-    def process_websites_in_thread(self, websites_chunk):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as thread_executor:
-            futures = [thread_executor.submit(self.process_website, website) for website in websites_chunk]
-            return [future.result() for future in concurrent.futures.as_completed(futures)]
-
-    def processing(self):
-        start_time = time.time()
-
-        chunker = SimpleChunker(self.processes)
-        website_chunks = chunker.chunk_data(self.websites)
-
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self.processes) as process_executor:
-            futures = [
-                process_executor.submit(self.process_websites_in_thread, chunk) for chunk in website_chunks
-            ]
-            all_data = []
-            for future in concurrent.futures.as_completed(futures):
-                all_data.extend(future.result())
-
-        for data in all_data:
-            print(data)
-
-        end_time = time.time()
-        print(f"Total processing time: {end_time - start_time:.2f} seconds")
+    def run(self):
+        return self.process_data(self.websites)
 
 
 if __name__ == '__main__':
-    file = CSVParser(file_path='crunchbase_data/organizations.csv', row_name='homepage_url')
-    res = file.get_data()
-    fast = FastParsing(websites=res, threads=80, process=3)
-    fast.processing()
+    file = CSVParser(file_path='crunchbase_data/test.csv', row_name='homepage_url')
+    websites = file.get_data()
+
+    time_start = time.time()
+    processor_simple = WebsiteProcessor(websites=websites, threads=70, processes=3)
+    result_simple = processor_simple.run()
+    time_end = time.time()
+    print(result_simple)
+    print(time_end-time_start)
+    print(len(result_simple))

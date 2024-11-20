@@ -4,8 +4,9 @@ from abc import abstractmethod, ABC
 
 
 class BaseCSVReader(ABC):
-    def __init__(self, file_path):
+    def __init__(self, file_path, row_name):
         self.file_path = file_path
+        self.row_name = row_name
 
     @abstractmethod
     def read_file(self, **kwargs):
@@ -14,8 +15,7 @@ class BaseCSVReader(ABC):
 
 class CSVReader(BaseCSVReader):
     def __init__(self, row_name, file_path):
-        super().__init__(file_path)
-        self.row_name = row_name
+        super().__init__(file_path, row_name)
 
     def read_file(self, **kwargs):
         with open(self.file_path, "r", encoding="utf-8") as infile:
