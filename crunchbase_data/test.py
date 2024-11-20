@@ -1,5 +1,6 @@
 import csv
 import subprocess
+from parser.csv_reader import CSVParser
 
 
 def install_extractor():
@@ -33,20 +34,23 @@ def extract_emails_from_url(domain, output_file):
 
 def process_csv(input_file, output_file):
     summary_data = []
-    with open(input_file, mode="r", encoding="utf-8") as infile:
-        reader = csv.DictReader(infile)
-        for row in reader:
-            homepage_url = row.get("homepage_url", "").strip()
-            if homepage_url:
-                print(f"Обрабатывается: {homepage_url}")
-                emails = extract_emails_from_url(homepage_url, output_file)
-                for email in emails:
-                    summary_data.append({"domain": homepage_url, "extracted_emails": email})
-            else:
-                summary_data.append({"domain": homepage_url, "extracted_emails": "No emails found"})
-    with open(output_file, mode="w", encoding="utf-8", newline="") as summary_outfile:
-        fieldnames = ["domain", "extracted_emails"]
-        summary_writer = csv.DictWriter(summary_outfile, fieldnames=fieldnames)
+
+    parser = CSVParser(input_file, 'homepage_url')
+    homepage_urls = parser.get_data()
+
+    for homepage_url in homepage_urls:
+        homepage_url = homepage_url.strip()
+        if homepage_url:
+            print(f"Processing {homepage_url}")
+            emails = extract_emails_from_url(homepage_url, output_file)
+            for email in emails:
+                summary_data.append({'homepage_url': homepage_url, 'extracted_emails': email})
+        else:
+            summary_data.append({'homepage_url': homepage_url, 'extracted_emails': 'No email found'})
+
+    with open(output_file, mode='w', encoding="utf-8", newline='') as summary_file:
+        fieldnames = ['homepage_url', 'extracted_emails']
+        summary_writer = csv.DictWriter(summary_file, fieldnames=fieldnames)
         summary_writer.writeheader()
         summary_writer.writerows(summary_data)
 
