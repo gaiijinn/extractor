@@ -44,29 +44,41 @@ def process_websites_in_process(websites, browser):
         all_data = [future.result() for future in concurrent.futures.as_completed(futures)]
     return all_data
 
+
 def remove_duplicates_and_empty_emails(input_path, output_path):
-    seen = set()
+    website_emails = {}
 
     with open(input_path, mode="r", encoding="utf-8", newline="") as infile:
         reader = csv.DictReader(infile)
         for row in reader:
+            website = row["website"]
             email = row["email"]
-            if email:
-                seen.add((row["website"], email))
+
+            if not email or not website:
+                continue
+
+            if website in website_emails:
+                website_emails[website].add(email)
+            else:
+                website_emails[website] = {email}
+
 
     with open(output_path, mode="w", encoding="utf-8", newline="") as outfile:
         writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
         writer.writeheader()
-        writer.writerows({"website": website, "email": email} for website, email in seen)
+
+        for website, emails in website_emails.items():
+            for email in emails:
+                writer.writerow({"website": website, "email": email})
 
 
 def main():
     time_start = time.time()
     browser = Browser()
-    output_path = Path("thread_result/just_all_data_3procc_70thread_5depth2.csv")
-    final_output_path = Path("thread_result/just_all_data_filtered2.csv")
+    output_path = Path("thread_result/just_all_data_3procc_70thread_5depth23.csv")
+    final_output_path = Path("thread_result/just_all_data_filtered23.csv")
 
-    websites = read_websites('crunchbase_data/organizations1.csv')
+    websites = read_websites('crunchbase_data/organizations.csv')
     # websites = read_websites('crunchbase_data/test.csv')
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=3) as process_executor:
