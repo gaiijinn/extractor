@@ -1,10 +1,48 @@
 import csv
+import json
 import time
 import concurrent.futures
 from pathlib import Path
 from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser as Browser
+from typing import Dict, Set
+
+
+class RemoveDuplicatesEmails:
+    def __init__(self, input_path: str, output_path: str):
+        self.input_path = input_path
+        self.output_path = output_path
+        self.website_emails: Dict[str, Set[str]] = {}
+
+    def load_emails(self) -> None:
+        with open(self.input_path, mode="r", encoding="utf-8", newline="") as infile:
+            reader = csv.DictReader(infile)
+            for row in reader:
+                website = row["website"]
+                email = row["email"]
+
+                if not email:
+                    continue
+
+                if website in self.website_emails:
+                    self.website_emails[website].add(email)
+                else:
+                    self.website_emails[website] = {email}
+
+    def save_emails_to_csv(self) -> None:
+        with open(self.output_path, mode="w", encoding="utf-8", newline="") as outfile:
+            writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
+            writer.writeheader()
+
+            for website, emails in self.website_emails.items():
+                for email in emails:
+                    writer.writerow({"website": website, "email": email})
+
+    def start_remove_duplicates_emails(self) -> None:
+        self.load_emails()
+        self.save_emails_to_csv()
+
 
 def read_websites(file_path):
     with open(file_path, "r", encoding="utf-8") as infile:
@@ -45,39 +83,10 @@ def process_websites_in_process(websites, browser):
     return all_data
 
 
-def remove_duplicates_and_empty_emails(input_path, output_path):
-    website_emails = {}
-
-    with open(input_path, mode="r", encoding="utf-8", newline="") as infile:
-        reader = csv.DictReader(infile)
-        for row in reader:
-            website = row["website"]
-            email = row["email"]
-
-            if not email:
-                continue
-
-            if website in website_emails:
-                website_emails[website].add(email)
-            else:
-                website_emails[website] = {email}
-
-
-    with open(output_path, mode="w", encoding="utf-8", newline="") as outfile:
-        writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
-        writer.writeheader()
-
-        for website, emails in website_emails.items():
-            for email in emails:
-                writer.writerow({"website": website, "email": email})
-
-
-
 def main():
     time_start = time.time()
     browser = Browser()
     output_path = Path("thread_result/just_all_data_3procc_70thread_5depth23.csv")
-    final_output_path = Path("thread_result/just_all_data_filtered23.csv")
 
     websites = read_websites('crunchbase_data/organizations.csv')
     # websites = read_websites('crunchbase_data/test.csv')
@@ -96,7 +105,8 @@ def main():
         for data in all_data:
             save_to_custom_csv(data, output_path)
 
-    remove_duplicates_and_empty_emails(output_path, final_output_path)
+    removeemails = RemoveDuplicatesEmails(input_path="thread_result/just_all_data_3procc_70thread_5depth23.csv", output_path="thread_result/just_all_data_filtered23.csv")
+    removeemails.start_remove_duplicates_emails()
 
     time_end = time.time()
     print(f"Processing time: {time_end - time_start:.2f} seconds")
