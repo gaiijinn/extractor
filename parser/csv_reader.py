@@ -44,10 +44,11 @@ class CSVMultiReader(BaseCSVReader):
                 missing_columns = [col for col in self.row_names if col not in reader.fieldnames]
                 if missing_columns:
                     raise ValueError(f"Columns {missing_columns} not found in the file.")
-                return [[row.get(col, None) for col in self.row_names] for row in reader]
+
+                return [
+                    {col: row[col] for col in self.row_names if col in row}
+                    for row in reader
+                ]
         except FileNotFoundError:
             raise FileNotFoundError(f"File '{self.file_path}' not found.")
 
-
-test = CSVMultiReader(row_names=['homepage_url', 'uuid'], file_path='../crunchbase_data/small_data.csv')
-print(test.read_file())
