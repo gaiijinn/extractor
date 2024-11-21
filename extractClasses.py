@@ -1,7 +1,7 @@
-import abc
 import re
 from typing import Dict, Set
 import csv
+import abc
 
 
 class BaseEmailValidator(abc.ABC):
@@ -12,8 +12,7 @@ class BaseEmailValidator(abc.ABC):
     def validate(self, **kwargs):
         pass
 
-
-class EmailValidator:
+class EmailValidator(BaseEmailValidator):
     def __init__(self, pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"):
         super().__init__(pattern)
 
@@ -60,3 +59,11 @@ class RemoveDuplicatesEmails:
     def start_remove_duplicates_emails(self) -> None:
         self.load_emails()
         self.save_emails_to_csv()
+
+
+test = RemoveDuplicatesEmails(input_path='thread_result/just_all_data_2procc_20thread_5depth.csv',
+                              output_path='final_test.csv',)
+
+test.start_remove_duplicates_emails()
+my_data = test.website_emails
+print(my_data)
