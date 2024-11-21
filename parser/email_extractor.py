@@ -78,7 +78,6 @@ class EmailFactory:
         self.email_extractor.install_extractor()
         self.email_saver.process_csv()
         self.email_saver.save_results(self.output_path)
-        print('Done')
 
 
 if __name__ == '__main__':
@@ -94,5 +93,3 @@ if __name__ == '__main__':
     factory = EmailFactory(email_extractor=email_extractor, email_saver=email_saver, output_path=output_path)
     factory.run()
 
-    print(email_saver.results)
-    
