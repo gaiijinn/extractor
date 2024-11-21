@@ -1,11 +1,20 @@
 import re
 from typing import Dict, Set
 import csv
+import abc
 
 
-class EmailValidator:
-    def __init__(self, pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"):
+class BaseEmailValidator(abc.ABC):
+    def __init__(self, pattern):
         self.pattern = pattern
+
+    @abc.abstractmethod
+    def validate(self, **kwargs):
+        pass
+
+class EmailValidator(BaseEmailValidator):
+    def __init__(self, pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"):
+        super().__init__(pattern)
 
     def validate(self, email):
         if re.match(self.pattern, email):
@@ -14,11 +23,11 @@ class EmailValidator:
 
 
 class RemoveDuplicatesEmails:
-    def __init__(self, input_path: str, output_path: str, validator: EmailValidator):
+    def __init__(self, input_path: str, output_path: str, validator: EmailValidator = None):
         self.input_path = input_path
         self.output_path = output_path
         self.website_emails: Dict[str, Set[str]] = {}
-        self.validator = validator
+        self.validator = validator or EmailValidator()
 
     def load_emails(self) -> None:
         with open(self.input_path, mode="r", encoding="utf-8", newline="") as infile:
@@ -50,3 +59,11 @@ class RemoveDuplicatesEmails:
     def start_remove_duplicates_emails(self) -> None:
         self.load_emails()
         self.save_emails_to_csv()
+
+
+test = RemoveDuplicatesEmails(input_path='thread_result/just_all_data_2procc_20thread_5depth.csv',
+                              output_path='final_test.csv',)
+
+test.start_remove_duplicates_emails()
+my_data = test.website_emails
+print(my_data)
