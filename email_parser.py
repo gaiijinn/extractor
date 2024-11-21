@@ -3,8 +3,9 @@ from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser
 import concurrent.futures
 from typing import Type
-from parser import chunkers, mixins
+from parser import chunkers, mixins, csv_reader
 import abc
+
 
 
 class BaseFastProcessor(abc.ABC, mixins.ThreadMixin, mixins.ProcessMixin):
@@ -58,15 +59,9 @@ class WebsiteProcessor(BaseFastProcessor):
 
 
 if __name__ == '__main__':
-    # file = CSVReader(file_path='crunchbase_data/small_data.csv', row_name='homepage_url')
-    # websites = file.read_file()
-    #clean_websites = [email for email in websites if email == 'investor']
+    file = csv_reader.CSVReader(file_path='crunchbase_data/small_data.csv', row_name='homepage_url')
+    websites = file.read_file()
 
-    # time_start = time.time()
-    # processor_simple = WebsiteProcessor(websites=websites, threads=1, processes=2)
-    # result_simple = processor_simple.run()
-    # time_end = time.time()
-    # print(result_simple)
-    # print(time_end-time_start)
-    # print(len(result_simple))
-    pass
+    processor_simple = WebsiteProcessor(websites=websites, threads=30, processes=2)
+    result_simple = processor_simple.run()
+    print(result_simple)

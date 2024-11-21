@@ -48,6 +48,3 @@ class CSVMultiReader(BaseCSVReader):
         except FileNotFoundError:
             raise FileNotFoundError(f"File '{self.file_path}' not found.")
 
-
-test = CSVMultiReader(row_names=['homepage_url', 'uuid'], file_path='../crunchbase_data/small_data.csv')
-print(test.read_file())
