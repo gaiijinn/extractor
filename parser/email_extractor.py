@@ -31,6 +31,7 @@ class EmailExtractor:
             )
             with open(output_path, mode="r", encoding="utf-8") as f:
                 emails = f.read().strip().split('\n')
+                print(emails)
                 return [email for email in emails if email]
         except subprocess.CalledProcessError as e:
             print(f"Error processing {domain}: {e}")
@@ -38,15 +39,13 @@ class EmailExtractor:
 
 
 class EmailSaver:
-    def __init__(self, input_path, output_path):
+    def __init__(self, input_path, output_path, data):
         self.email_extractor = EmailExtractor(input_path, output_path)
         self.summary_data = []
+        self.data = data
 
     def process_csv(self):
-        parser = CSVMultiReader(['uuid', 'homepage_url'], self.email_extractor.input_path)
-        rows = parser.read_file()
-
-        for row in rows:
+        for row in self.data:
             uuid = row.get('uuid', '').strip()
             homepage_url = row.get('homepage_url', '').strip()
 
@@ -54,12 +53,11 @@ class EmailSaver:
                 print(f"Processing {homepage_url}")
                 emails = self.email_extractor.extract_emails_from_url(homepage_url)
                 if emails:
+                    print('few emails', emails)
                     for email in emails:
                         self.summary_data.append({'uuid': uuid, 'extracted_emails': email})
-                else:
-                    self.summary_data.append({'uuid': uuid, 'extracted_emails': 'No email found'})
             else:
-                self.summary_data.append({'uuid': uuid, 'extracted_emails': 'No email found'})
+                print("no homepage_url")
 
     def save_results(self):
         with open(output_path, mode='w', encoding="utf-8", newline='') as summary_file:
@@ -70,11 +68,13 @@ class EmailSaver:
 
 
 class EmailFactory:
-    def __init__(self, input_path, output_path):
+    def __init__(self, input_path, output_path, data):
         self.input_path = input_path
         self.output_path = output_path
+        self.data = data
+
         self.email_extractor = EmailExtractor(input_path, output_path)
-        self.email_saver = EmailSaver(input_path, output_path)
+        self.email_saver = EmailSaver(input_path, output_path, data)
 
     def run(self):
         self.email_extractor.install_extractor()
@@ -87,6 +87,11 @@ if __name__ == '__main__':
     input_path = '../crunchbase_data/small_data.csv'
     output_path = '../finals/finalemail_extractor.csv'
 
-    extractor = EmailFactory(input_path, output_path)
+    parser = CSVMultiReader(['uuid', 'homepage_url'], file_path=input_path)
+    rows = parser.read_file()
+    print(rows)
+
+
+    extractor = EmailFactory(input_path, output_path, data=rows)
     extractor.run()
     
