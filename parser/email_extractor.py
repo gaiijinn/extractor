@@ -1,5 +1,6 @@
 import csv
 import subprocess
+from typing import Type
 from parser.csv_reader import CSVMultiReader
 from email_class import BaseEmailExtractor, BaseEmailSaver
 
@@ -69,9 +70,15 @@ class EmailSaver(BaseEmailSaver):
 
 
 class EmailFactory:
-    def __init__(self, email_extractor: BaseEmailExtractor, email_saver: BaseEmailSaver, output_path: str):
-        self.email_extractor = email_extractor
-        self.email_saver = email_saver
+    def __init__(
+            self,
+            email_extractor_class: Type[BaseEmailExtractor],
+            email_saver_class: Type[BaseEmailSaver],
+            output_path: str,
+            data: list
+    ):
+        self.email_extractor = email_extractor_class(output_path)
+        self.email_saver = email_saver_class(email_extractor_class, data)
         self.output_path = output_path
 
     def run(self):
@@ -90,6 +97,12 @@ if __name__ == '__main__':
     email_extractor = EmailExtractor(extractor_output_path=output_path)
     email_saver = EmailSaver(email_extractor=email_extractor, data=rows)
 
-    factory = EmailFactory(email_extractor=email_extractor, email_saver=email_saver, output_path=output_path)
+    factory = EmailFactory(
+        email_extractor_class=EmailExtractor,
+        email_saver_class=EmailSaver,
+        output_path=output_path,
+        data=rows
+    )
+
     factory.run()
 
