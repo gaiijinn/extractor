@@ -1,5 +1,4 @@
 import csv
-from typing import Type
 from abc import abstractmethod, ABC
 
 
@@ -18,15 +17,37 @@ class CSVReader(BaseCSVReader):
         super().__init__(file_path, row_name)
 
     def read_file(self, **kwargs):
-        with open(self.file_path, "r", encoding="utf-8") as infile:
-            reader = csv.DictReader(infile)
-            result = list(row[self.row_name] for row in reader if row.get(self.row_name))
-            return result
+        try:
+            with open(self.file_path, "r", encoding="utf-8") as infile:
+                reader = csv.DictReader(infile)
+
+                if self.row_name not in reader.fieldnames:
+                    raise ValueError(f"Column '{self.row_name}' not found in the file.")
+
+                return [row[self.row_name] for row in reader if row.get(self.row_name)]
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File '{self.file_path}' not found.")
 
 
-class CSVParser:
-    def __init__(self, file_path, row_name, reader_class: Type[BaseCSVReader] = CSVReader):
-        self._reader = reader_class(row_name, file_path)
+class CSVMultiReader(BaseCSVReader):
+    def __init__(self, row_names, file_path):
+        if not isinstance(row_names, list) or not all(isinstance(name, str) for name in row_names):
+            raise ValueError("row_names must be a list of strings")
+        self.row_names = row_names
+        super().__init__(row_name=row_names, file_path=file_path)
 
-    def get_data(self):
-        return self._reader.read_file()
+    def read_file(self, **kwargs):
+        try:
+            with open(self.file_path, "r", encoding="utf-8") as infile:
+                reader = csv.DictReader(infile)
+
+                missing_columns = [col for col in self.row_names if col not in reader.fieldnames]
+                if missing_columns:
+                    raise ValueError(f"Columns {missing_columns} not found in the file.")
+                return [[row.get(col, None) for col in self.row_names] for row in reader]
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File '{self.file_path}' not found.")
+
+
+test = CSVMultiReader(row_names=['homepage_url', 'uuid'], file_path='../crunchbase_data/small_data.csv')
+print(test.read_file())
