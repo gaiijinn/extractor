@@ -1,22 +1,12 @@
 import csv
 import subprocess
-from abc import ABC, abstractmethod
 from parser.csv_reader import CSVMultiReader
-
-
-class BaseEmailExtractor(ABC):
-    @abstractmethod
-    def install_extractor(self):
-        pass
-
-    @abstractmethod
-    def extract_emails_from_url(self, domain: str) -> list:
-        pass
+from email_class import BaseEmailExtractor, BaseEmailSaver
 
 
 class EmailExtractor(BaseEmailExtractor):
-    def __init__(self, output_path: str):
-        self.output_path = output_path
+    def __init__(self, extractor_output_path: str):
+        self.output_path = extractor_output_path
 
     def install_extractor(self):
         try:
@@ -46,21 +36,11 @@ class EmailExtractor(BaseEmailExtractor):
         return []
 
 
-class BaseEmailSaver(ABC):
-    @abstractmethod
-    def process_csv(self):
-        pass
-
-    @abstractmethod
-    def save_results(self, output_path: str):
-        pass
-
-
 class EmailSaver(BaseEmailSaver):
     def __init__(self, email_extractor: BaseEmailExtractor, data: list):
         self.email_extractor = email_extractor
         self.data = data
-        self.summary_data = []
+        self.results = {}
 
     def process_csv(self):
         for row in self.data:
@@ -71,17 +51,21 @@ class EmailSaver(BaseEmailSaver):
                 print(f"Processing {homepage_url}")
                 emails = self.email_extractor.extract_emails_from_url(homepage_url)
                 if emails:
-                    for email in emails:
-                        self.summary_data.append({'uuid': uuid, 'extracted_emails': email})
+                    self.results[uuid] = emails[0]
+                else:
+                    self.results[uuid] = None
             else:
-                print("no homepage_url")
+                self.results[uuid] = None
 
     def save_results(self, output_path: str):
+        fieldnames = ['uuid', 'emails']
+
         with open(output_path, mode='w', encoding="utf-8", newline='') as summary_file:
-            fieldnames = ['uuid', 'extracted_emails']
             summary_writer = csv.DictWriter(summary_file, fieldnames=fieldnames)
             summary_writer.writeheader()
-            summary_writer.writerows(self.summary_data)
+
+            for uuid, emails in self.results.items():
+                summary_writer.writerow({'uuid': str(uuid), 'emails': str(emails)})
 
 
 class EmailFactory:
@@ -104,9 +88,11 @@ if __name__ == '__main__':
     parser = CSVMultiReader(['uuid', 'homepage_url'], file_path=input_path)
     rows = parser.read_file()
 
-    email_extractor = EmailExtractor(output_path=output_path)
+    email_extractor = EmailExtractor(extractor_output_path=output_path)
     email_saver = EmailSaver(email_extractor=email_extractor, data=rows)
 
     factory = EmailFactory(email_extractor=email_extractor, email_saver=email_saver, output_path=output_path)
     factory.run()
+
+    print(email_saver.results)
     
