@@ -78,7 +78,7 @@ class EmailFactory:
             data: list
     ):
         self.email_extractor = email_extractor_class(output_path)
-        self.email_saver = email_saver_class(email_extractor_class, data)
+        self.email_saver = email_saver_class(self.email_extractor, data)
         self.output_path = output_path
 
     def run(self):
