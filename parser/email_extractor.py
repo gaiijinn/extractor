@@ -2,6 +2,7 @@ import subprocess
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser_helpers.installer.email_extractor_installer import CurlInstaller
 from parser_helpers.savers.email_saver import EmailSaver
