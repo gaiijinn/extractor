@@ -1,5 +1,6 @@
 import subprocess
 from abc import ABC, abstractmethod
+
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser_helpers.installer.email_extractor_installer import CurlInstaller
 
@@ -22,13 +23,19 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
     def extract_emails_from_url(self, homepage_url: str) -> list:
         try:
             subprocess.run(
-                ["wsl", "email_extractor", "-depth=1",f"-out={self.output_file}", f"-url={homepage_url}"],
+                [
+                    "wsl",
+                    "email_extractor",
+                    "-depth=1",
+                    f"-out={self.output_file}",
+                    f"-url={homepage_url}",
+                ],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            with (open(self.output_file, mode="r", encoding="utf-8") as f):
-                emails = f.read().strip().split('\n')
+            with open(self.output_file, mode="r", encoding="utf-8") as f:
+                emails = f.read().strip().split("\n")
                 a = [email for email in emails if email]
                 print(a)
                 return a
@@ -36,11 +43,10 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
             print(f"Error processing {homepage_url}: {e}")
         return []
 
-
     def process_csv(self):
         for row in self._data:
-            uuid = row.get('uuid', '').strip()
-            homepage_url = row.get('homepage_url', '').strip()
+            uuid = row.get("uuid", "").strip()
+            homepage_url = row.get("homepage_url", "").strip()
 
             if homepage_url:
                 print(f"Processing {homepage_url}")
@@ -49,19 +55,17 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
                     for email in emails:
                         self.results.append({"uuid": uuid, "emails": email})
 
-
     def get_data(self):
         return self._data
 
 
-if __name__ == '__main__':
-    input_path = '../crunchbase_data/small_data.csv'
-    output_file = '../finals/finalemail_extractor.csv'
+if __name__ == "__main__":
+    input_path = "../crunchbase_data/small_data.csv"
+    output_file = "../finals/finalemail_extractor.csv"
 
-    parser = CSVMultiReader(['uuid', 'homepage_url'], file_path=input_path)
+    parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
     rows = parser.read_file()
 
     extractor = EmailExtractor(output_file=output_file, data=rows)
     extractor.process_csv()
     print(extractor.results)
-

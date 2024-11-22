@@ -1,5 +1,5 @@
 import csv
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 
 class BaseCSVReader(ABC):
@@ -44,10 +44,6 @@ class CSVMultiReader(BaseCSVReader):
                 missing_columns = [col for col in self.row_names if col not in reader.fieldnames]
                 if missing_columns:
                     raise ValueError(f"Columns {missing_columns} not found in the file.")
-                return [
-                    {col: row.get(col, None) for col in self.row_names}
-                    for row in reader
-                ]
+                return [{col: row.get(col, None) for col in self.row_names} for row in reader]
         except FileNotFoundError:
             raise FileNotFoundError(f"File '{self.file_path}' not found.")
-

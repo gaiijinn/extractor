@@ -1,7 +1,7 @@
+import abc
+import csv
 import re
 from typing import Dict, Set
-import csv
-import abc
 
 
 class BaseEmailValidator(abc.ABC):
@@ -46,7 +46,6 @@ class RemoveDuplicatesEmails:
                         self.website_emails[website].add(valid_email)
                     else:
                         self.website_emails[website] = {valid_email}
-
 
     def save_emails_to_csv(self) -> None:
         with open(self.output_path, mode="w", encoding="utf-8", newline="") as outfile:
