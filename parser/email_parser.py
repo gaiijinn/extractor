@@ -1,17 +1,25 @@
+import abc
+import concurrent.futures
+from typing import Type
+
 from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser
-import concurrent.futures
-from typing import Type
-from parser_helpers.mixins import mixins
+
 from parser_helpers import chunkers
 from parser_helpers.csv_readers import csv_reader
-import abc
+from parser_helpers.mixins import mixins
 
 
 class BaseFastProcessor(abc.ABC, mixins.ThreadMixin, mixins.ProcessMixin):
-    def __init__(self, data, threads: int = 1, processes: int = 1,
-                 chunker_class: Type[chunkers.BaseChunker] = None, **kwargs):
+    def __init__(
+        self,
+        data,
+        threads: int = 1,
+        processes: int = 1,
+        chunker_class: Type[chunkers.BaseChunker] = None,
+        **kwargs
+    ):
         self.data = data
         self.threads = threads
         self.processes = processes
@@ -25,9 +33,7 @@ class BaseFastProcessor(abc.ABC, mixins.ThreadMixin, mixins.ProcessMixin):
 
     def process_data(self):
         chunks = self.chunker.chunk_data(self.data)
-        results = self.process_in_processes(
-            chunks, self._process_chunk, max_processes=self.processes
-        )
+        results = self.process_in_processes(chunks, self._process_chunk, max_processes=self.processes)
         return [item for sublist in results for item in sublist]
 
     def process_in_threads(self, items, worker_func, max_threads):
@@ -58,14 +64,10 @@ class WebsiteProcessor(BaseFastProcessor):
         return worker.get_data()
 
 
-
-if __name__ == '__main__':
-    file = csv_reader.CSVReader(file_path='../crunchbase_data/small_data.csv', row_name='homepage_url')
+if __name__ == "__main__":
+    file = csv_reader.CSVReader(file_path="../crunchbase_data/small_data.csv", row_name="homepage_url")
     websites = file.read_file()
 
     processor_simple = WebsiteProcessor(websites=websites, threads=30, processes=2)
     result_simple = processor_simple.run()
     print(result_simple)
-
-
-

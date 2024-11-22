@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 
 class BaseChunker(ABC):
@@ -13,7 +13,7 @@ class SimpleChunker(BaseChunker):
 
     def chunk_data(self, data):
         chunk_size = len(data) // self.num_processes
-        return [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+        return [data[i : i + chunk_size] for i in range(0, len(data), chunk_size)]
 
 
 class PercentageChunker(BaseChunker):
@@ -24,4 +24,4 @@ class PercentageChunker(BaseChunker):
 
     def chunk_data(self, data):
         chunk_size = max(1, int(len(data) * (self.percentage / 100)))
-        return [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+        return [data[i : i + chunk_size] for i in range(0, len(data), chunk_size)]
