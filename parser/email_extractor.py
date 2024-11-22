@@ -1,5 +1,4 @@
 import subprocess
-import time
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -77,8 +76,6 @@ if __name__ == "__main__":
     input_path = "../crunchbase_data/small_data.csv"
     output_file = "../finals/finalemail_extractor.csv"
 
-    start_time = time.time()
-
     parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
     rows = parser.read_file()
 
@@ -87,8 +84,3 @@ if __name__ == "__main__":
 
     saver = EmailSaver(output_file=output_file, data=extractor.results)
     saver.save_result()
-
-    end_time = time.time()
-
-    elapsed_time = end_time - start_time
-    print(f"{elapsed_time:.2f} секунд.")
