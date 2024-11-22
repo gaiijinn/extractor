@@ -12,11 +12,3 @@ repos:
       - id: flake8
         args:
           - --verbose
-
-  - repo: local
-    hooks:
-      - id: custom-hook
-        name: Custom Hook for black and flake8
-        entry: python custom_hook.py
-        language: system
-        files: \.py$
