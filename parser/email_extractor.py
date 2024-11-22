@@ -5,13 +5,12 @@ from parser.csv_reader import CSVMultiReader
 from email_class import BaseEmailExtractor, BaseEmailSaver, BaseInstaller, CurlInstaller
 
 
-class EmailExtractor(BaseEmailExtractor):
-    def __init__(self, extractor_output_path: str, installer: BaseInstaller):
-        self.output_path = extractor_output_path
-        self.installer = installer
+class EmailExtractor(BaseEmailExtractor, BaseInstaller):
+    def __init__(self, output_path: str):
+        self.output_path = output_path
 
     def install_extractor(self):
-        self.installer.install()
+        self.install()
 
     def extract_emails_from_url(self, domain: str) -> list:
         try:
