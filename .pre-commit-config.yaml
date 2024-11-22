@@ -3,8 +3,20 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
+        args:
+          - --verbose
 
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.1
     hooks:
       - id: flake8
+        args:
+          - --verbose
+
+  - repo: local
+    hooks:
+      - id: custom-hook
+        name: Custom Hook for black and flake8
+        entry: python custom_hook.py
+        language: system
+        files: \.py$
