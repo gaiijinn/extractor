@@ -101,5 +101,5 @@ email_filter = EmailDomainFilter(input_path='final_test.csv', output_path='final
 email_filter.load_emails()
 filtered_emails = email_filter.filter_emails(email_part="support", domain_part="gmail.com")
 # filtered_emails = email_filter.filter_emails(domain_part="gmail.com")
-# filtered_emails = email_filter.filter_emails(email_part="support")
+# filtered_emails = email_filter.filter_emails(email_part='support')
 email_filter.save_emails_to_csv()
