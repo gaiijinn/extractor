@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser_helpers.installer.email_extractor_installer import CurlInstaller
+from parser_helpers.savers.email_saver import EmailSaver
 
 
 class BaseEmailExtractor(ABC):
@@ -47,14 +48,18 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
             homepage_url = row.get("homepage_url", "").strip()
 
             if homepage_url:
+                print(f"Processing {homepage_url}")
                 emails = self.extract_emails_from_url(homepage_url)
                 if emails:
-                    if uuid not in self.results:
-                        self.results[uuid] = []
-                    self.results[uuid].extend(emails)
+                    for email in emails:
+                        if uuid in self.results:
+                            self.results[uuid].add(email)
+                        else:
+                            self.results[uuid] = {email}
+        print(type(self.results))
 
-    def get_data(self):
-        return self._data
+    def get_results(self):
+        return self.results
 
 
 if __name__ == "__main__":
