@@ -7,31 +7,11 @@ import abc
 class EmailProcessorInterface(abc.ABC):
     @abc.abstractmethod
     def load_emails(self) -> None:
-        with open(self.input_path, mode="r", encoding="utf-8", newline="") as infile:
-            reader = csv.DictReader(infile)
-            for row in reader:
-                website = row["website"]
-                email = row["email"]
-
-                if not email:
-                    continue
-
-                valid_email = self.validator.validate(email)
-                if valid_email:
-                    if website in self.website_emails:
-                        self.website_emails[website].add(valid_email)
-                    else:
-                        self.website_emails[website] = {valid_email}
+        pass
 
     @abc.abstractmethod
     def save_emails_to_csv(self) -> None:
-        with open(self.output_path, mode="w", encoding="utf-8", newline="") as outfile:
-            writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
-            writer.writeheader()
-
-            for website, emails in self.website_emails.items():
-                for email in emails:
-                    writer.writerow({"website": website, "email": email})
+        pass
 
 class BaseEmailValidator(abc.ABC):
     def __init__(self, pattern):
@@ -59,11 +39,31 @@ class RemoveDuplicatesEmails(EmailProcessorInterface):
         self.validator = validator or EmailValidator()
 
     def load_emails(self) -> None:
-        super().load_emails()
+        with open(self.input_path, mode="r", encoding="utf-8", newline="") as infile:
+            reader = csv.DictReader(infile)
+            for row in reader:
+                website = row["website"]
+                email = row["email"]
+
+                if not email:
+                    continue
+
+                valid_email = self.validator.validate(email)
+                if valid_email:
+                    if website in self.website_emails:
+                        self.website_emails[website].add(valid_email)
+                    else:
+                        self.website_emails[website] = {valid_email}
 
 
     def save_emails_to_csv(self) -> None:
-        super().save_emails_to_csv()
+        with open(self.output_path, mode="w", encoding="utf-8", newline="") as outfile:
+            writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
+            writer.writeheader()
+
+            for website, emails in self.website_emails.items():
+                for email in emails:
+                    writer.writerow({"website": website, "email": email})
 
     def start_remove_duplicates_emails(self) -> None:
         self.load_emails()
