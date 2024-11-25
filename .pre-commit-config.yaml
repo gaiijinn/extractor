@@ -3,8 +3,14 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
+        args:
+          - --verbose
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
     hooks:
-      - id: flake8
+      - id: isort
+        args:
+          - --profile=black
+          - --verbose
+
