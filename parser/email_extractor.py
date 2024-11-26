@@ -1,10 +1,11 @@
 import subprocess
 from abc import ABC, abstractmethod
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List
-from parser_helpers.installer.email_extractor_installer import CurlInstaller
+
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
+from parser_helpers.installer.email_extractor_installer import CurlInstaller
+
 
 class BaseEmailExtractor(ABC):
     @abstractmethod
@@ -12,9 +13,8 @@ class BaseEmailExtractor(ABC):
         pass
 
 
-
 class EmailExtractor(CurlInstaller, BaseEmailExtractor):
-    def __init__(self, data, output_file: str = 'finalemail_extractor.csv', max_threads: int = 70):
+    def __init__(self, data, output_file: str = "finalemail_extractor.csv", max_threads: int = 70):
         self.output_file = output_file
         self.results = {}
         self._data = data
@@ -28,7 +28,7 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
     def extract_emails_from_url(self, homepage_url: str) -> List[str]:
         try:
             subprocess.run(
-                ["curl, ""email_extractor", "-depth=1", f"-out={self.output_file}", f"-url={homepage_url}"],
+                ["curl, " "email_extractor", "-depth=1", f"-out={self.output_file}", f"-url={homepage_url}"],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -68,11 +68,12 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
     def get_result(self):
         return self.results
 
-if __name__ == "__main__":
 
-    input_path = "../crunchbase_data/test.csv"
-    parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
-    rows = parser.read_file()
-
-    extractor = EmailExtractor(data=rows)
-    extractor.process_csv()
+# if __name__ == "__main__":
+#
+#     input_path = "../crunchbase_data/test.csv"
+#     parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
+#     rows = parser.read_file()
+#
+#     extractor = EmailExtractor(data=rows)
+#     extractor.process_csv()

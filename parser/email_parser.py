@@ -1,8 +1,9 @@
 from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser
+
 from parser_helpers.csv_readers import csv_reader
-from parser_helpers.fast_parcer.fast import BaseFastProcessor
+from parser_helpers.fast_parcer.fast_process import BaseFastProcessor
 
 
 class WebsiteProcessor(BaseFastProcessor):
