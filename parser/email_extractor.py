@@ -15,18 +15,15 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
         self.results = {}
         self._data = data
 
+        self.install_extractor()
+
     def install_extractor(self):
         self.install()
 
     def extract_emails_from_url(self, homepage_url: str) -> list:
         try:
             subprocess.run(
-                [
-                    "email_extractor",
-                    "-depth=1",
-                    f"-out={self.output_file}",
-                    f"-url={homepage_url}",
-                ],
+                ["wsl", "email_extractor", "-depth=1", f"-out={self.output_file}", f"-url={homepage_url}"],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
