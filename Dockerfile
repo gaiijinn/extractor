@@ -8,4 +8,4 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-ENTRYPOINT [ "python", "-m", "parser.email_extractor" ]
+ENTRYPOINT [ "python", "-m", "parser.email_parser" ]
