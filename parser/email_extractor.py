@@ -24,7 +24,6 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
         try:
             subprocess.run(
                 [
-                    "wsl",
                     "email_extractor",
                     "-depth=1",
                     f"-out={self.output_file}",
@@ -60,8 +59,8 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
 
 
 if __name__ == "__main__":
-    input_path = "../crunchbase_data/small_data.csv"
-    output_file = "../finals/finalemail_extractor.csv"
+    input_path = "crunchbase_data/small_data.csv"
+    output_file = "finals/finalemail_extractor.csv"
 
     parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
     rows = parser.read_file()
