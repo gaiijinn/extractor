@@ -1,24 +1,34 @@
+import os
 import subprocess
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from typing import List
 
+from parser_helpers.chunkers.chunkers import SimpleChunker
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser_helpers.installer.email_extractor_installer import CurlInstaller
 
 
 class BaseEmailExtractor(ABC):
     @abstractmethod
-    def extract_emails_from_url(self, domain: str) -> list:
+    def extract_emails_from_url(self, homepage_url: str) -> List[str]:
         pass
 
 
 class EmailExtractor(CurlInstaller, BaseEmailExtractor):
-    def __init__(self, data, output_file: str = "finalemail_extractor.csv", max_threads: int = 70):
+    def __init__(
+        self,
+        data,
+        output_file: str = "../finals/finalemail_extractor.csv",
+        max_threads: int = 70,
+        max_processes: int = 2,
+    ):
         self.output_file = output_file
         self.results = {}
         self._data = data
         self.max_threads = max_threads
+        self.max_processes = max_processes
+        self.chunk_object = SimpleChunker(num_processes=self.max_processes)
 
         self.install_extractor()
 
@@ -40,7 +50,7 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
             print(f"Error processing {homepage_url}: {e}")
         return []
 
-    def process_row(self, row):
+    def process_row(self, row, results):
         uuid = row.get("uuid", "").strip()
         homepage_url = row.get("homepage_url", "").strip()
 
@@ -49,31 +59,53 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
             emails = self.extract_emails_from_url(homepage_url)
             if emails:
                 for email in emails:
-                    if uuid in self.results:
-                        self.results[uuid].add(email)
+                    if uuid in results:
+                        results[uuid].add(email)
                     else:
-                        self.results[uuid] = {email}
+                        results[uuid] = {email}
 
-    def process_csv(self):
+    def process_chunk(self, chunk):
+        local_results = {}
         with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
-            future_to_row = {executor.submit(self.process_row, row): row for row in self._data}
+            future_to_row = {executor.submit(self.process_row, row, local_results): row for row in chunk}
 
             for future in as_completed(future_to_row):
-                row = future_to_row[future]
                 try:
                     future.result()
                 except Exception as exc:
-                    print(f"Error processing row {row}: {exc}")
+                    print(f"Ошибка при обработке строки {future_to_row[future]}: {exc}")
+        return local_results
+
+    def process_csv(self):
+        chunks = self.chunk_object.chunk_data(self._data)
+
+        with ProcessPoolExecutor(max_workers=self.max_processes) as executor:
+            future_to_chunk = {executor.submit(self.process_chunk, chunk): chunk for chunk in chunks}
+
+            for future in as_completed(future_to_chunk):
+                try:
+                    local_results = future.result()
+                    for uuid, emails in local_results.items():
+                        if uuid in self.results:
+                            self.results[uuid].update(emails)
+                        else:
+                            self.results[uuid] = set(emails)
+                except Exception as exc:
+                    print(f"Ошибка при обработке чанка: {exc}")
+
+    def delete_useless_file(self):
+        os.remove("../finals/finalemail_extractor.csv")
 
     def get_result(self):
         return self.results
 
 
 # if __name__ == "__main__":
-#
 #     input_path = "../crunchbase_data/test.csv"
 #     parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
 #     rows = parser.read_file()
 #
 #     extractor = EmailExtractor(data=rows)
 #     extractor.process_csv()
+#     extractor.delete_useless_file()
+#     results = extractor.get_result()
