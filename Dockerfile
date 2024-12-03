@@ -3,9 +3,13 @@ FROM python:3.12-slim
 ENV PYTHONDONWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-COPY . .
+COPY . /parser/src
+WORKDIR /parser/src
 
+RUN mv requirements.txt /parser
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install -r /parser/requirements.txt
+
+EXPOSE 8000
 
 ENTRYPOINT [ "python", "-m", "parser.email_parser" ]
