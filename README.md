@@ -6,8 +6,8 @@ $ pre-commit autoupdate
 ```
 
 
-## Build&Run dockerfile.
+## Build&Run docker-compose.
 ```console
-$ docker build -t scrab .
-$ docker run scrab       
+$ docker-compose build
+$ docker-compose up      
 ```
