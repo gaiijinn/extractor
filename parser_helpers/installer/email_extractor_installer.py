@@ -13,11 +13,8 @@ class CurlInstaller(BaseInstaller):
         try:
             subprocess.run(
                 [
-                    "wsl",
-                    "sh",
-                    "-c",
                     "curl -sL \
-                     https://raw.githubusercontent.com/kevincobain2000/email_extractor/master/install.sh | \
+                         https://raw.githubusercontent.com/kevincobain2000/email_extractor/master/install.sh | \
                      sh",
                 ],
                 check=True,
