@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from parser_helpers.installer.email_extractor_installer import CurlInstaller
 
+
 class BaseEmailExtractor(ABC):
     @abstractmethod
     def extract_emails_from_url(self, domain: str) -> list:
@@ -14,11 +15,6 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
         self.output_file = output_file
         self.results = {}
         self._data = data
-
-        self.install_extractor()
-
-    def install_extractor(self):
-        self.install()
 
     def extract_emails_from_url(self, homepage_url: str) -> list:
         try:
@@ -59,7 +55,7 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
         return self.results
 
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    input_path = "crunchbase_data/small_data.csv"
 #    output_file = "finals/finalemail_extractor.csv"
 #
