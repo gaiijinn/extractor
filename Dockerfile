@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 COPY . /parser/src
 WORKDIR /parser/src
 
-RUN apt install curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 RUN mv requirements.txt /parser
 RUN pip install --upgrade pip
