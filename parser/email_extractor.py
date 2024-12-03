@@ -2,6 +2,7 @@ import os
 import subprocess
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import List
 
 from parser_helpers.chunkers.chunkers import SimpleChunker
@@ -19,9 +20,9 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
     def __init__(
         self,
         data,
-        output_file: str = "../finals/finalemail_extractor.csv",
-        max_threads: int = 70,
-        max_processes: int = 2,
+        output_file: str = Path(__file__).parent.resolve() / "../finals/finalemail_extractor.csv",
+        max_threads: int = 100,
+        max_processes: int = 4,
     ):
         self.output_file = output_file
         self.results = {}
@@ -73,7 +74,7 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
                 try:
                     future.result()
                 except Exception as exc:
-                    print(f"Ошибка при обработке строки {future_to_row[future]}: {exc}")
+                    print(f"Error processing row {future_to_row[future]}: {exc}")
         return local_results
 
     def process_csv(self):
@@ -91,21 +92,24 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
                         else:
                             self.results[uuid] = set(emails)
                 except Exception as exc:
-                    print(f"Ошибка при обработке чанка: {exc}")
+                    print(f"Error processing chunk: {exc}")
 
     def delete_useless_file(self):
-        os.remove("../finals/finalemail_extractor.csv")
+        try:
+            if os.path.exists(self.output_file):
+                os.remove(self.output_file)
+        except Exception as e:
+            print(f"Error deleting file {self.output_file}: {e}")
 
     def get_result(self):
         return self.results
 
 
 # if __name__ == "__main__":
-#     input_path = "../crunchbase_data/test.csv"
+#     input_path = "../crunchbase_data/small_data.csv"
 #     parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
 #     rows = parser.read_file()
 #
 #     extractor = EmailExtractor(data=rows)
 #     extractor.process_csv()
-#     extractor.delete_useless_file()
 #     results = extractor.get_result()
