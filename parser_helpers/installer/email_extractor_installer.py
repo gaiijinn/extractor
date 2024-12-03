@@ -13,16 +13,18 @@ class CurlInstaller(BaseInstaller):
         try:
             subprocess.run(
                 [
-                    "wsl",
-                    "sh",
-                    "-c",
-                    "curl -sL \
-                     https://raw.githubusercontent.com/kevincobain2000/email_extractor/master/install.sh | \
-                     sh",
+                    "curl",
+                    "-sL",
+                    "https://raw.githubusercontent.com/kevincobain2000/email_extractor/master/install.sh",
                 ],
                 check=True,
+                shell=False,
             )
-            subprocess.run("mv email_extractor /usr/local/bin/", shell=True, check=True)
+            subprocess.run(
+                ["mv", "email_extractor", "/usr/local/bin/"],
+                check=True,
+                shell=False,
+            )
             print("Installed email_extractor")
         except subprocess.CalledProcessError as e:
             print(f"Error during installation: {e}")

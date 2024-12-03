@@ -1,0 +1,8 @@
+services:
+  python-app:
+    build:
+      context: .
+    volumes:
+      - .:/parser
+    working_dir: /parser
+    command: python main.py
