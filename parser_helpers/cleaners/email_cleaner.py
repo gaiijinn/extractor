@@ -2,7 +2,18 @@ import abc
 import csv
 import re
 from typing import Dict, Set
+import csv
+import abc
 
+
+class EmailProcessorInterface(abc.ABC):
+    @abc.abstractmethod
+    def load_emails(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    def save_emails_to_csv(self) -> None:
+        pass
 
 class BaseEmailValidator(abc.ABC):
     def __init__(self, pattern):
@@ -23,7 +34,7 @@ class EmailValidator(BaseEmailValidator):
         return None
 
 
-class RemoveDuplicatesEmails:
+class RemoveDuplicatesEmails(EmailProcessorInterface):
     def __init__(self, input_path: str, output_path: str, validator: EmailValidator = None):
         self.input_path = input_path
         self.output_path = output_path
