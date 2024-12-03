@@ -23,7 +23,12 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
     def extract_emails_from_url(self, homepage_url: str) -> list:
         try:
             subprocess.run(
-                ["wsl", "email_extractor", "-depth=1", f"-out={self.output_file}", f"-url={homepage_url}"],
+                [
+                    "email_extractor",
+                    "-depth=1",
+                    f"-out={self.output_file}",
+                    f"-url={homepage_url}",
+                ],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -54,13 +59,14 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
         return self.results
 
 
-# if __name__ == "__main__":
-#     input_path = "../crunchbase_data/small_data.csv"
-#     output_file = "../finals/finalemail_extractor.csv"
+#if __name__ == "__main__":
+#    input_path = "crunchbase_data/small_data.csv"
+#    output_file = "finals/finalemail_extractor.csv"
 #
-#     parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
-#     rows = parser.read_file()
+#    parser = CSVMultiReader(["uuid", "homepage_url"], file_path=input_path)
+#    rows = parser.read_file()
 #
-#     extractor = EmailExtractor(output_file=output_file, data=rows)
-#     extractor.process_csv()
-#     print(extractor.results)
+#    extractor = EmailExtractor(output_file=output_file, data=rows)
+#    extractor.process_csv()
+#    print(extractor.results)
+#
