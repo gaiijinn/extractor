@@ -6,10 +6,12 @@ ENV PYTHONUNBUFFERED=1
 COPY . /parser/src
 WORKDIR /parser/src
 
+RUN apt install curl
+
 RUN mv requirements.txt /parser
 RUN pip install --upgrade pip
 RUN pip install -r /parser/requirements.txt
 
 EXPOSE 8000
 
-ENTRYPOINT [ "python", "-m", "parser.email_parser" ]
+ENTRYPOINT [ "python", "main.py" ]
