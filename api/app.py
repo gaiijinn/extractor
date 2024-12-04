@@ -1,10 +1,29 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
 from typing import List
 import os
+
+from sqlalchemy.orm import Session
+
+from api.db.config import SessionLocal
+from api.db.models import WebsiteInfo
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser.email_extractor import EmailExtractor
 
 app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@app.get("/companies/")
+def read_companies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    companies = db.query(WebsiteInfo).offset(skip).limit(limit).all()
+    return companies
+
 
 @app.post("/extract_emails/")
 async def extract_emails(

@@ -1,15 +1,21 @@
-from sqlalchemy import Column, Integer, String, UUID, Text
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, Text, UUID
+from sqlalchemy.dialects.postgresql import UUID as PgUUID
+import uuid
 
-Base = declarative_base()
+from api.db.config import Base
+
+
+class CompanyIndustry(Base):
+    __tablename__ = "file_loader_companyindustry"
+    id = Column(PgUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(128), unique=True)
 
 class WebsiteInfo(Base):
-    __tablename__ = "app_websiteinfo"
-
-    uuid = Column(UUID(as_uuid=True), primary_key=True, unique=True)
-    name = Column(String(100), nullable=False)
+    __tablename__ = "file_loader_websiteinfo"
+    uuid = Column(PgUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(100))
     cb_url = Column(Text, nullable=True)
-    homepage_url = Column(Text, nullable=False)
+    homepage_url = Column(Text)
     facebook_url = Column(Text, nullable=True)
     twitter_url = Column(Text, nullable=True)
     linkedin_url = Column(Text, nullable=True)

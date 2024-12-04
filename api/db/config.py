@@ -1,18 +1,16 @@
-from pydantic import BaseSettings
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-class Settings(BaseSettings):
-    POSTGRES_DB: str = "citus"
-    POSTGRES_USER: str = "citus"
-    POSTGRES_PASSWORD: str = "z4peRnZYXSFwjkB"
-    POSTGRES_HOST: str = "c-vc-board.sdp7gta73xhnts.postgres.cosmos.azure.com"
-    POSTGRES_PORT: int = 5432
+POSTGRES_DB = "citus"
+POSTGRES_USER = "citus"
+POSTGRES_PASSWORD = "z4peRnZYXSFwjkB"
+POSTGRES_HOST = "c-vc-board.sdp7gta73xhnts.postgres.cosmos.azure.com"
+POSTGRES_PORT = 5432
 
-    @property
-    def database_url(self) -> str:
-        return (
-            f"postgresql+asyncpg://{self.POSTGRES_USER}:"
-            f"{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
-            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        )
+DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
-settings = Settings()
+engine = create_engine(DATABASE_URL)
+metadata = MetaData()
+Base = declarative_base()
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
