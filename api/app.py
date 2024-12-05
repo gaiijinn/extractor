@@ -29,7 +29,7 @@ def read_companies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
 async def extract_emails(
     file: UploadFile = File(...),
     fields: List[str] = Form(...),
-    output_file: str = Form("finals/investor_email.csv")
+    output_file: str = Form("./finals/investor_email.csv")
 ):
     try:
         fields = [field.split(",") for field in fields][0]
