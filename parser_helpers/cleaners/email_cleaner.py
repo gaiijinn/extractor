@@ -28,6 +28,7 @@ class RemoveDuplicatesEmails:
         self.input_path = input_path
         self.output_path = output_path
         self.website_emails: Dict[str, Set[str]] = {}
+        self.all_emails: Set[str] = set()
         self.validator = validator or EmailValidator()
 
     def load_emails(self) -> None:
@@ -42,6 +43,11 @@ class RemoveDuplicatesEmails:
 
                 valid_email = self.validator.validate(email)
                 if valid_email:
+                    if valid_email in self.all_emails:
+                        continue
+
+                    self.all_emails.add(valid_email)
+
                     if uuid in self.website_emails:
                         self.website_emails[uuid].add(valid_email)
                     else:
