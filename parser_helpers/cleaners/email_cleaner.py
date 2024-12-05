@@ -34,7 +34,7 @@ class RemoveDuplicatesEmails:
         with open(self.input_path, mode="r", encoding="utf-8", newline="") as infile:
             reader = csv.DictReader(infile)
             for row in reader:
-                website = row["website"]
+                uuid = row["uuid"]
                 email = row["email"]
 
                 if not email:
@@ -42,19 +42,19 @@ class RemoveDuplicatesEmails:
 
                 valid_email = self.validator.validate(email)
                 if valid_email:
-                    if website in self.website_emails:
-                        self.website_emails[website].add(valid_email)
+                    if uuid in self.website_emails:
+                        self.website_emails[uuid].add(valid_email)
                     else:
-                        self.website_emails[website] = {valid_email}
+                        self.website_emails[uuid] = {valid_email}
 
     def save_emails_to_csv(self) -> None:
         with open(self.output_path, mode="w", encoding="utf-8", newline="") as outfile:
-            writer = csv.DictWriter(outfile, fieldnames=["website", "email"])
+            writer = csv.DictWriter(outfile, fieldnames=["uuid", "email"])
             writer.writeheader()
 
-            for website, emails in self.website_emails.items():
+            for uuid, emails in self.website_emails.items():
                 for email in emails:
-                    writer.writerow({"website": website, "email": email})
+                    writer.writerow({"uuid": uuid, "email": email})
 
     def start_remove_duplicates_emails(self) -> None:
         self.load_emails()
