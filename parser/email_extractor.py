@@ -1,3 +1,4 @@
+import os
 import subprocess
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -24,7 +25,6 @@ class EmailExtractor(CurlInstaller, BaseEmailExtractor):
             subprocess.run(
                 [
                     "email_extractor",
-                    "-depth=10",
                     f"-out={self.output_file}",
                     f"-url={homepage_url}",
                 ],

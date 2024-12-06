@@ -1,5 +1,6 @@
 from parser.email_extractor import EmailExtractor
 
+from parser_helpers.cleaners.email_cleaner import RemoveDuplicatesEmails
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser_helpers.savers.email_saver import EmailSaver
 
@@ -12,5 +13,8 @@ if __name__ == "__main__":
 
     emails = extractor.get_result()
 
-    saver = EmailSaver(output_file="finals/email.csv", data=emails)
+    remover = RemoveDuplicatesEmails(emails)
+    data = remover.remove_duplicates()
+
+    saver = EmailSaver(output_file="finals/email.csv", data=data)
     saver.save_result()
