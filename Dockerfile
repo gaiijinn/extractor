@@ -19,4 +19,5 @@ COPY . /parser/src
 
 EXPOSE 8000
 
-ENTRYPOINT [ "python", "main.py" ]
+# ENTRYPOINT [ "python", "main.py" ]
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
