@@ -5,11 +5,6 @@ import uuid
 from api.db.config import Base
 
 
-class CompanyIndustry(Base):
-    __tablename__ = "file_loader_companyindustry"
-    id = Column(PgUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(128), unique=True)
-
 class WebsiteInfo(Base):
     __tablename__ = "file_loader_websiteinfo"
     uuid = Column(PgUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
