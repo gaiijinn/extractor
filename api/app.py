@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from api.db.config import SessionLocal
 from api.db.models import WebsiteInfo
+from parser_helpers.cleaners.email_cleaner import RemoveDuplicatesEmails
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser.email_extractor import EmailExtractor
+from parser_helpers.savers.email_saver import EmailSaver
 
 app = FastAPI()
 
@@ -29,7 +31,6 @@ def read_companies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
 async def extract_emails(
     file: UploadFile = File(...),
     fields: List[str] = Form(...),
-    output_file: str = Form("./finals/investor_email.csv")
 ):
     try:
         fields = [field.split(",") for field in fields][0]
@@ -41,11 +42,16 @@ async def extract_emails(
         parser = CSVMultiReader(fields, file_path=file_location)
         rows = parser.read_file()
 
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        extractor = EmailExtractor(output_file=output_file, data=rows)
+        extractor = EmailExtractor(data=rows)
         extractor.process_csv()
 
         emails = extractor.get_result()
+
+        remover = RemoveDuplicatesEmails(emails)
+        data = remover.remove_duplicates()
+
+        saver = EmailSaver(output_file="finals/email.csv", data=data)
+        saver.save_result()
 
         os.remove(file_location)
 
