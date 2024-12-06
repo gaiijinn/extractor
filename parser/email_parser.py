@@ -6,9 +6,10 @@ from extract_emails import DefaultFilterAndEmailFactory as Factory
 from extract_emails import DefaultWorker
 from extract_emails.browsers.requests_browser import RequestsBrowser
 
-from parser_helpers.chunkers import chunkers
+from parser_helpers import chunkers
 from parser_helpers.csv_readers import csv_reader
 from parser_helpers.mixins import mixins
+
 
 class BaseFastProcessor(abc.ABC, mixins.ThreadMixin, mixins.ProcessMixin):
     def __init__(
@@ -64,7 +65,7 @@ class WebsiteProcessor(BaseFastProcessor):
 
 
 if __name__ == "__main__":
-    file = csv_reader.CSVReader(file_path="crunchbase_data/small_data.csv", row_name="homepage_url")
+    file = csv_reader.CSVReader(file_path="../crunchbase_data/small_data.csv", row_name="homepage_url")
     websites = file.read_file()
 
     processor_simple = WebsiteProcessor(websites=websites, threads=30, processes=2)
