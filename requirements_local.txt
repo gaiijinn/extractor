@@ -2,7 +2,12 @@ extract_emails==5.3.4
 poetry==1.8.4
 requests==2.32.3
 isort==5.13.2
-flake8==7.1.1
 black==24.10.0
-flake8-black==0.3.6
 pre-commit==4.0.1
+fastapi==0.115.5
+psycopg2-binary==2.9.10
+pydantic==2.10.3
+python-multipart==0.0.19
+SQLAlchemy==2.0.36
+uvicorn==0.32.1
+python-dotenv==1.0.1
