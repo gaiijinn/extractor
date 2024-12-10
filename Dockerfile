@@ -17,6 +17,7 @@ RUN curl -sL https://raw.githubusercontent.com/kevincobain2000/email_extractor/m
 
 COPY . /parser/src
 
-EXPOSE 8000
+EXPOSE 8001
 
-ENTRYPOINT [ "python", "main.py" ]
+# ENTRYPOINT [ "python", "main.py" ]
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
