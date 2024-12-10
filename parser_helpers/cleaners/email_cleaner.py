@@ -12,9 +12,9 @@ class BaseEmailValidator(abc.ABC):
         pass
 
 
-class EmailValidator(BaseEmailValidator):
+class EmailValidator:
     def __init__(self, pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"):
-        super().__init__(pattern)
+        self.pattern = pattern
 
     def validate(self, email):
         if re.match(self.pattern, email):
@@ -28,11 +28,10 @@ class RemoveDuplicatesEmails:
         self.all_emails: Set[str] = set()
         self.validator = validator or EmailValidator()
 
-    def remove_duplicates(self):
+    async def remove_duplicates(self):
         local_emails = {}
 
         for key, value in self.website_emails.items():
-
             for email in value:
                 if not email:
                     continue
