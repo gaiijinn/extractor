@@ -5,7 +5,7 @@ import os
 from sqlalchemy.orm import Session
 
 from api.db.config import SessionLocal
-from api.db.models import WebsiteInfo
+from api.db.models import WebsiteInfo, Email
 from parser_helpers.cleaners.email_cleaner import RemoveDuplicatesEmails
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
 from parser.email_extractor import EmailExtractor
