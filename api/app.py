@@ -1,17 +1,18 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
-from typing import List
 import os
+from parser.email_extractor import EmailExtractor
+from typing import List
 
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from api.db.config import SessionLocal
-from api.db.models import WebsiteInfo, Email
+from api.db.models import Email, WebsiteInfo
 from parser_helpers.cleaners.email_cleaner import RemoveDuplicatesEmails
 from parser_helpers.csv_readers.csv_reader import CSVMultiReader
-from parser.email_extractor import EmailExtractor
 from parser_helpers.savers.email_saver import EmailSaver
 
 app = FastAPI()
+
 
 def get_db():
     db = SessionLocal()
@@ -61,7 +62,7 @@ async def write_emails(
                 new_email = Email(email=email, related_website_id=website.uuid)
                 db.add(new_email)
 
-        db.commit()
+            db.commit()
 
         os.remove(file_location)
         return {"status": "success", "message": "Emails have been processed and added to the database."}
