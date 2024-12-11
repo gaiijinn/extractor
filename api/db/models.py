@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, UUID
+from sqlalchemy import Column, String, Text, UUID, Integer, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 import uuid
 
@@ -17,3 +17,12 @@ class WebsiteInfo(Base):
     city = Column(String(100), nullable=True)
     region = Column(String(100), nullable=True)
     country_code = Column(String(100), nullable=True)
+
+
+class Email(Base):
+    __tablename__ = "file_loader_email"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    is_active = Column(Boolean, default=True)
+    related_website_id = Column(PgUUID(as_uuid=True), ForeignKey("file_loader_websiteinfo.uuid"), nullable=False)
