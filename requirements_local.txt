@@ -1,4 +1,4 @@
-extract_emails==5.3.4
+extract_emails==5.3.3
 poetry==1.8.4
 requests==2.32.3
 isort==5.13.2
