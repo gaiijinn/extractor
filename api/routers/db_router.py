@@ -25,10 +25,10 @@ async def write_emails(
     fields: List[str] = Form(...),
     db: Session = Depends(get_db),
 ):
-    # if 'uuid' not in fields:
-    #     raise HTTPException(status_code=400, detail="The 'uuid' field is required in fields.")
     try:
         fields = [field.split(",") for field in fields][0]
+        if 'uuid' not in fields:
+            raise HTTPException(status_code=400, detail="The 'uuid' field is required in fields.")
         file_location = f"./uploads/{file.filename}"
         os.makedirs("./uploads", exist_ok=True)
         with open(file_location, "wb") as f:
