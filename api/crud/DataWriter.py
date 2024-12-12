@@ -41,4 +41,4 @@ class DataWriter:
                     }
                 )
                 self.db.add(new_entry)
-        self.db.commit()
+            self.db.commit()
