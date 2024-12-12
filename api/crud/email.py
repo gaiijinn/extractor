@@ -19,11 +19,10 @@ def create_emails_or_phones(rows: List[Dict[str, Optional[Any]]], fields: List[s
 
     field_aliases = {
         "email": "emails",
-        "phones": "phones",
+        "phone": "phones",
     }
 
     if "emails" in fields:
-        # write_emails_to_db(rows=rows, fields=fields, db=db)
         email_writer = DataWriter(
             db=db,
             fields=fields,
@@ -34,8 +33,6 @@ def create_emails_or_phones(rows: List[Dict[str, Optional[Any]]], fields: List[s
         email_writer.write_to_db(rows)
     elif "phones" in fields:
         pass
-        # write_phones_to_db()
-
         # phone_writer = DataWriter(
         #     db=db,
         #     fields=fields,
@@ -46,4 +43,3 @@ def create_emails_or_phones(rows: List[Dict[str, Optional[Any]]], fields: List[s
         # phone_writer.write_to_db(rows)
     else:
         raise ValueError("The 'emails' or 'phones' field is required in fields.")
-    # db.commit()

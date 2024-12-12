@@ -36,7 +36,7 @@ class DataWriter:
             if not existing_entry:
                 new_entry = self.model(
                     **{
-                        field_name: value,
+                        self.model.__name__.lower(): value,
                         "related_website_id": website.uuid,
                     }
                 )
