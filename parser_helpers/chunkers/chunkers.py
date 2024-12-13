@@ -18,7 +18,7 @@ class SimpleChunker(BaseChunker):
 
 class PercentageChunker(BaseChunker):
     def __init__(self, percentage):
-        if not (0 < percentage <= 100):
+        if not (0 < percentage and percentage <= 100):
             raise ValueError("Percentage must be between 0 and 100.")
         self.percentage = percentage
 

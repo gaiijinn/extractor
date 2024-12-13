@@ -26,3 +26,4 @@ class EmailSaver(BaseEmailSaver):
             for k, v in self._data.items():
                 for email in v:
                     writer.writerow({"uuid": k, "emails": email})
+
